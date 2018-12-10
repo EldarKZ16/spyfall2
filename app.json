@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "SpyFind",
+    "icon": "./src/assets/images/logo.png",
+    "version": "1.0.4",
+    "slug": "spyfall2",
+    "sdkVersion": "27.0.0",
+    "privacy": "unlisted",
+    "orientation": "portrait",
+    "splash": {
+      "backgroundColor": "#303030",
+      "resizeMode": "cover",
+      "image": "./src/assets/images/splashScreen.png"
+    },
+    "ios": {
+      "bundleIdentifier": "kz.playforfun.spyfall"
+    },
+    "android": {
+      "package": "kz.playforfun.spyfall",
+      "versionCode": 5,
+      "permissions": []
+    }
+  }
+}

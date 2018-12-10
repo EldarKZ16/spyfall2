@@ -1,0 +1,32 @@
+export const WARNING_NETWORK_OFF = "Подключитесь к сети";
+export const SUCCESS_NETWORK_ON = "Подключен к сети";
+export const APP_NAME = "SPYFIND";
+export const ENTER_YOUR_NAME = "Введите ваше имя";
+export const BUTTON_NEXT = "Далее";
+export const SPY = "Шпион";
+export const LOCATION = "Локация";
+export const ROLE = "Роль";
+export const BUTTON_DISCONNECT = "Отсоединиться";
+export const BUTTON_SAVE = "Сохранить";
+export const GAME_CODE = "Код игры";
+export const BUTTON_START = "Старт";
+export const WARNING_MINIMAL_NUMBER_OF_PLAYERS =
+  "Минимальное количество игроков - 3";
+export const GAME_DESCRIPTION =
+  "Каждому игроку задается локация и роль. У всех игроков локации одинаковы, но роли разные. Среди всех участников один игрок является шпионом. Шпион не знает ни локацию, ни ролей. Задача шпиона узнать локацию. Если шпион узнает локацию - побеждает шпион. Если игроки узнают кто является шпионом - побеждает команда. Все это осуществляется вопросами которые задаются игроками друг другу, которые либо разоблачают шпиона, либо выдают локацию. Все очень просто!";
+export const BUTTON_UNDERSTOOD = "Понятно";
+export const BUTTON_JOIN = "Подключиться";
+export const ERROR_GAME_NOT_FOUND = "Комната не найдена";
+export const SUCCESS_GAME_FOUND = "Комната найдена";
+export const WAITING_FOR_START = "Ожидание старта ";
+export const ENTER_GAME_CODE = "Введите код игры";
+export const BUTTON_CREATE_GAME = "Создать игру";
+export const BUTTON_JOIN_GAME = "Войти в игру";
+export const BUTTON_HOW_TO_PLAY = "Как играть?";
+export const WON = "Выигрыш!";
+export const LOST = "Проигрыш!";
+export const BUTTON_TO_MAIN = "На главную";
+export const BUTTON_VOTE = "Голосовать";
+export const BUTTON_PUBLISH = "Опубликовать";
+export const WHO_IS_SPY = "Как вы думаете, кто шпион?";
+export const WAITING_FOR_ADMIN = "Ожидание админа";
