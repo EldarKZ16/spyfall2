@@ -1,20 +1,9 @@
 import React from "react";
 import { AsyncStorage, Text, StyleSheet } from "react-native";
 import { Asset, AppLoading } from "expo";
-import { createStackNavigator } from "react-navigation";
 import { Snackbar, Provider } from "react-native-paper";
-import getSlideFromRightTransition from "react-navigation-slide-from-right-transition";
-import {
-  MainScreen,
-  CreateGameScreen,
-  JoinGameScreen,
-  WelcomeScreen,
-  GuideScreen,
-  CardScreen,
-  VoteScreen,
-  ResultsScreen,
-  ChangeNameScreen
-} from "./src/screens";
+import { WelcomeScreen } from "./src/screens";
+import Router from "./src/router";
 import { firebaseDB } from "./src/firebase";
 import {
   SUCCESS_NETWORK_ON,
@@ -23,23 +12,6 @@ import {
 import { SCREEN_DIMENSIONS } from "./src/assets/components/common/dimensions";
 
 global.connectionSt = null;
-
-const StackNavigator = createStackNavigator(
-  {
-    mainScreen: MainScreen,
-    changeNameScreen: ChangeNameScreen,
-    createGameScreen: CreateGameScreen,
-    joinGameScreen: JoinGameScreen,
-    guideScreen: GuideScreen,
-    cardScreen: CardScreen,
-    voteScreen: VoteScreen,
-    resultsScreen: ResultsScreen
-  },
-  {
-    initialRouteName: "mainScreen",
-    transitionConfig: getSlideFromRightTransition
-  }
-);
 
 export default class App extends React.Component {
   state = {
@@ -99,7 +71,7 @@ export default class App extends React.Component {
     if (this.state.wasShown === "true") {
       return (
         <React.Fragment>
-          <StackNavigator />
+          <Router />
           <Provider>
             <Snackbar
               visible={this.state.visible}
