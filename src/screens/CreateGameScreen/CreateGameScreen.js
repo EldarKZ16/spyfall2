@@ -4,7 +4,8 @@ import {
   StyleSheet,
   YellowBox,
   Text,
-  TouchableOpacity
+  TouchableOpacity,
+  BackHandler
 } from "react-native";
 import _ from "lodash";
 import { HeaderBackButton } from "react-navigation";
@@ -100,16 +101,6 @@ export default class CreateGameScreen extends React.Component {
     });
   };
 
-  async componentWillMount() {
-    await this.generateIDofRoom();
-    this.connectAdminToRoom();
-  }
-
-  componentDidMount() {
-    this.checkChangesInRoom();
-    this.props.navigation.setParams({ gameID: this.state.gameID });
-  }
-
   updateFirebaseDataWithCards = () => {
     const DB = [...this.state.realtimeDB];
     const locations = Object.keys(GAME_CARDS);
@@ -162,6 +153,29 @@ export default class CreateGameScreen extends React.Component {
       this.setState({ visible: true });
     }
   };
+
+  handleOnBack = () => {
+    firebaseDB.ref(this.state.gameID).remove();
+    this.props.navigation.goBack();
+    return true;
+  };
+
+  async componentWillMount() {
+    await this.generateIDofRoom();
+    this.connectAdminToRoom();
+  }
+
+  componentDidMount() {
+    BackHandler.addEventListener("hardwareBackPress", this.handleOnBack);
+    this.checkChangesInRoom();
+    this.props.navigation.setParams({ gameID: this.state.gameID });
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener("hardwareBackPress", this.handleOnBack);
+    firebaseDB.ref(this.state.gameID).off("child_added");
+    firebaseDB.ref(this.state.gameID).off("child_removed");
+  }
 
   render() {
     return (

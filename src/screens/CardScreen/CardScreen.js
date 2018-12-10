@@ -126,6 +126,7 @@ export default class CardScreen extends React.Component {
   }
 
   componentWillUnmount() {
+    firebaseDB.ref().off("child_removed");
     clearInterval(this.interval);
   }
 

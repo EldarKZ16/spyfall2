@@ -7,13 +7,11 @@ import {
   Text,
   AsyncStorage
 } from "react-native";
-import { Snackbar, Provider } from "react-native-paper";
 import {
   APP_NAME,
   BUTTON_CREATE_GAME,
   BUTTON_JOIN_GAME,
-  BUTTON_HOW_TO_PLAY,
-  WARNING_NETWORK_OFF
+  BUTTON_HOW_TO_PLAY
 } from "../../assets/components/common/strings";
 import { SCREEN_DIMENSIONS } from "../../assets/components/common/dimensions";
 
@@ -43,8 +41,7 @@ export default class MainScreen extends React.Component {
   };
 
   state = {
-    name: "",
-    visible: ""
+    name: ""
   };
 
   getUsernameFromAsync = async () => {
@@ -72,8 +69,6 @@ export default class MainScreen extends React.Component {
       this.props.navigation.navigate(screenName, {
         username: this.state.name
       });
-    } else {
-      this.setState({ visible: true });
     }
   };
 
@@ -122,18 +117,6 @@ export default class MainScreen extends React.Component {
             </Text>
           </TouchableOpacity>
         </View>
-        <Provider>
-          <Snackbar
-            visible={this.state.visible}
-            onDismiss={() => this.setState({ visible: false })}
-            style={{ backgroundColor: "#ff3232" }}
-            duration={700}
-          >
-            <Text style={{ fontSize: SCREEN_DIMENSIONS.width * 0.045 }}>
-              {WARNING_NETWORK_OFF}
-            </Text>
-          </Snackbar>
-        </Provider>
       </View>
     );
   }

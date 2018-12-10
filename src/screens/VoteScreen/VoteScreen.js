@@ -170,6 +170,16 @@ export default class VoteScreen extends React.Component {
     this.checkChanges();
   }
 
+  componentWillUnmount() {
+    firebaseDB
+      .ref(
+        `${this.props.navigation.getParam(
+          "gameID"
+        )}/${this.props.navigation.getParam("keyID")}`
+      )
+      .off("child_added");
+  }
+
   render() {
     return (
       <View style={styles.container}>

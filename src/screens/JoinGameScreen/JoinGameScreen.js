@@ -124,6 +124,13 @@ export default class JoinGameScreen extends React.Component {
     this.searchForRoom();
   };
 
+  componentWillUnmount() {
+    firebaseDB
+      .ref(`${this.state.gameID}/${this.props.navigation.getParam("keyID")}`)
+      .off("child_added");
+    firebaseDB.ref().off("child_removed");
+  }
+
   render() {
     return (
       <View style={styles.container}>
