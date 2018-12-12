@@ -2,7 +2,7 @@
   "expo": {
     "name": "SpyFind",
     "icon": "./src/assets/images/logo.png",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "slug": "spyfall2",
     "sdkVersion": "27.0.0",
     "privacy": "unlisted",
@@ -17,7 +17,7 @@
     },
     "android": {
       "package": "kz.playforfun.spyfall",
-      "versionCode": 5,
+      "versionCode": 6,
       "permissions": []
     }
   }
