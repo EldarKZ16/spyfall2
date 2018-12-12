@@ -7,7 +7,8 @@ import {
   Text,
   Image,
   Keyboard,
-  ActivityIndicator
+  ActivityIndicator,
+  BackHandler
 } from "react-native";
 import { Snackbar, Provider } from "react-native-paper";
 import { HeaderBackButton } from "react-navigation";
@@ -56,11 +57,12 @@ export default class JoinGameScreen extends React.Component {
     roomFind: false
   };
   isScreen = true;
+  _isMounted = false;
 
   checkChangesAndNavigate = () => {
     let DB = firebaseDB.ref();
     DB.on("child_removed", data => {
-      if (data.key === this.state.gameID && this.isScreen) {
+      if (data.key === this.state.gameID && this.isScreen && this._isMounted) {
         this.props.navigation.goBack();
       }
     });
@@ -68,7 +70,7 @@ export default class JoinGameScreen extends React.Component {
     firebaseDB
       .ref(`${this.state.gameID}/${this.props.navigation.getParam("keyID")}`)
       .on("child_added", data => {
-        if (data.key === "role") {
+        if (data.key === "role" && this._isMounted) {
           DB = null;
           this.isScreen = false;
           this.props.navigation.navigate("cardScreen", {
@@ -80,51 +82,81 @@ export default class JoinGameScreen extends React.Component {
       });
   };
 
+  checkConnection = () => {
+    firebaseDB.ref(".info/connected").once("value", snap => {
+      if (!snap.val()) {
+        this.props.navigation.goBack();
+      }
+    });
+  };
+
   searchForRoom = () => {
     firebaseDB
       .ref()
       .once("value")
       .then(data => {
         if (
-          !data.hasChild(this.state.gameID) ||
-          !connectionSt ||
-          data.child(this.state.gameID).hasChild("time") ||
-          data.child(this.state.gameID).numChildren() > 7
+          (!data.hasChild(this.state.gameID) ||
+            data.child(this.state.gameID).hasChild("time") ||
+            data.child(this.state.gameID).numChildren() > 7) &&
+          this._isMounted
         ) {
           this.setState({
             visible: true,
             text: ERROR_GAME_NOT_FOUND,
             backColor: "#ff9c00"
           });
-        } else if (data.hasChild(this.state.gameID) && connectionSt) {
+        } else if (data.hasChild(this.state.gameID) && this._isMounted) {
           const keyID = new Date().getTime();
           this.props.navigation.setParams({ gameID: this.state.gameID, keyID });
-          firebaseDB
-            .ref(`${this.state.gameID}/${keyID}`)
-            .set({
-              user: this.state.name
-            })
-            .catch(err => {
-              console.log(err);
+          if (this._isMounted) {
+            firebaseDB
+              .ref(`${this.state.gameID}/${keyID}`)
+              .set({
+                user: this.state.name
+              })
+              .catch(err => {
+                console.log(err);
+              });
+            this.setState({
+              roomFind: true,
+              visible: true,
+              joinText: WAITING_FOR_START,
+              text: SUCCESS_GAME_FOUND,
+              backColor: "#006400"
             });
-          this.setState({
-            roomFind: true,
-            visible: true,
-            joinText: WAITING_FOR_START,
-            text: SUCCESS_GAME_FOUND,
-            backColor: "#006400"
-          });
-          this.checkChangesAndNavigate();
+
+            this.checkChangesAndNavigate();
+          }
         }
       });
   };
 
-  renderJoinGame = () => {
+  renderJoinGame = async () => {
     Keyboard.dismiss();
-    this.searchForRoom();
+    await this.searchForRoom();
+    this.checkConnection();
   };
 
+  handleOnBack = () => {
+    if (this.state.gameID !== undefined) {
+      firebaseDB
+        .ref(this.state.gameID)
+        .child(this.props.navigation.getParam("keyID"))
+        .remove();
+    }
+    this.props.navigation.goBack();
+    return true;
+  };
+
+  componentDidMount() {
+    this._isMounted = true;
+    BackHandler.addEventListener("hardwareBackPress", this.handleOnBack);
+  }
+
   componentWillUnmount() {
+    this._isMounted = false;
+    BackHandler.removeEventListener("hardwareBackPress", this.handleOnBack);
     firebaseDB
       .ref(`${this.state.gameID}/${this.props.navigation.getParam("keyID")}`)
       .off("child_added");
