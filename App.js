@@ -11,8 +11,6 @@ import {
 } from "./src/assets/components/common/strings";
 import { SCREEN_DIMENSIONS } from "./src/assets/components/common/dimensions";
 
-global.connectionSt = null;
-
 export default class App extends React.Component {
   state = {
     isReady: false,
@@ -20,6 +18,7 @@ export default class App extends React.Component {
     text: "",
     wasShown: null
   };
+  _connectionSt = null;
 
   wasShownStatus = async () => {
     const wasShown = await AsyncStorage.getItem("key");
@@ -33,20 +32,20 @@ export default class App extends React.Component {
   connectionCheck = () => {
     const connectedRef = firebaseDB.ref(".info/connected");
     connectedRef.on("value", snap => {
-      if (connectionSt && !snap.val()) {
+      if (this._connectionSt && !snap.val()) {
         this.setState({
           visible: true,
           text: WARNING_NETWORK_OFF
         });
       }
 
-      if (!connectionSt && snap.val()) {
+      if (!this._connectionSt && snap.val()) {
         this.setState({
           visible: true,
           text: SUCCESS_NETWORK_ON
         });
       }
-      connectionSt = snap.val();
+      this._connectionSt = snap.val();
     });
   };
 
