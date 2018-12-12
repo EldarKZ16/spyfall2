@@ -65,11 +65,9 @@ export default class MainScreen extends React.Component {
   };
 
   handleNextScreen = screenName => {
-    if (connectionSt) {
-      this.props.navigation.navigate(screenName, {
-        username: this.state.name
-      });
-    }
+    this.props.navigation.navigate(screenName, {
+      username: this.state.name
+    });
   };
 
   handleGuideGame = () => {

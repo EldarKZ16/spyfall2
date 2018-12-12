@@ -28,6 +28,7 @@ export default class CardScreen extends React.Component {
     isPressed: false
   };
   isScreen = true;
+  _isMounted = false;
 
   format() {
     let scd = this.state.seconds % 60;
@@ -50,7 +51,8 @@ export default class CardScreen extends React.Component {
     firebaseDB.ref().on("child_removed", data => {
       if (
         data.key === this.props.navigation.getParam("gameID") &&
-        this.isScreen
+        this.isScreen &&
+        this._isMounted
       ) {
         this.resetRoute();
       }
@@ -63,14 +65,21 @@ export default class CardScreen extends React.Component {
       .child(this.props.navigation.getParam("keyID"))
       .once("value")
       .then(data => {
-        this.setState({ role: data.val().role, location: data.val().location });
+        if (this._isMounted) {
+          this.setState({
+            role: data.val().role,
+            location: data.val().location
+          });
+        }
       });
 
     firebaseDB
       .ref(this.props.navigation.getParam("gameID"))
       .once("value")
       .then(data => {
-        this.setState({ seconds: data.val().time });
+        if (this._isMounted) {
+          this.setState({ seconds: data.val().time });
+        }
       });
   };
 
@@ -100,7 +109,7 @@ export default class CardScreen extends React.Component {
     this.resetRoute();
   };
 
-  componentWillMount() {
+  setSecondInterval = () => {
     this.interval = setInterval(() => {
       if (this.state.seconds <= 0) {
         clearInterval(this.interval);
@@ -109,9 +118,10 @@ export default class CardScreen extends React.Component {
       }
       this.setState({ seconds: this.state.seconds - 1 });
     }, 1000);
-  }
-
+  };
   async componentDidMount() {
+    this._isMounted = true;
+    await this.setSecondInterval();
     await this.getDataFromFirebase();
 
     if (!this.props.navigation.getParam("admin")) {
@@ -126,6 +136,7 @@ export default class CardScreen extends React.Component {
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
     firebaseDB.ref().off("child_removed");
     clearInterval(this.interval);
   }

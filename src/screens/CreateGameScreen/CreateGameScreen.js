@@ -58,6 +58,20 @@ export default class CreateGameScreen extends React.Component {
     spyPlayerID: "",
     visible: false
   };
+  _isMounted = false;
+
+  connectAdminToRoom = () => {
+    if (this._isMounted) {
+      firebaseDB
+        .ref(`${this.state.gameID}/${this.state.keyID}`)
+        .set({
+          user: this.state.name
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
+  };
 
   generateIDofRoom = () => {
     const uuidv4 = require("uuid/v4");
@@ -71,20 +85,9 @@ export default class CreateGameScreen extends React.Component {
     });
   };
 
-  connectAdminToRoom = () => {
-    firebaseDB
-      .ref(`${this.state.gameID}/${this.state.keyID}`)
-      .set({
-        user: this.state.name
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  };
-
   checkChangesInRoom = () => {
     firebaseDB.ref(this.state.gameID).on("child_added", data => {
-      if (data.key !== "time" && data.key !== "spyName") {
+      if (data.key !== "time" && data.key !== "spyName" && this._isMounted) {
         const newarray = [...this.state.realtimeDB, data];
         this.setState({
           realtimeDB: newarray
@@ -93,11 +96,13 @@ export default class CreateGameScreen extends React.Component {
     });
 
     firebaseDB.ref(this.state.gameID).on("child_removed", data => {
-      let newarray = [...this.state.realtimeDB];
-      newarray = newarray.filter(item => item.key !== data.key);
-      this.setState({
-        realtimeDB: newarray
-      });
+      if (this._isMounted) {
+        let newarray = [...this.state.realtimeDB];
+        newarray = newarray.filter(item => item.key !== data.key);
+        this.setState({
+          realtimeDB: newarray
+        });
+      }
     });
   };
 
@@ -112,29 +117,31 @@ export default class CreateGameScreen extends React.Component {
       let indexOfRole = Math.floor(Math.random() * roles.length);
       let roleOfPlayer = roles[indexOfRole];
       roles = roles.filter(role => role !== roleOfPlayer);
-      firebaseDB
-        .ref(`${this.state.gameID}/${data.key}`)
-        .update({
-          role: roleOfPlayer,
-          location: locationOfPlayers,
-          votes: 0
-        })
-        .catch(err => {
-          console.log(err);
-        });
-      firebaseDB
-        .ref(`${this.state.gameID}`)
-        .update({
-          time: this.state.realtimeDB.length * 60
-        })
-        .catch(err => {
-          console.log(err);
-        });
-      if (roleOfPlayer === SPY) {
-        firebaseDB.ref(`${this.state.gameID}`).update({
-          spyName: data.val().user
-        });
-        this.setState({ spyPlayerID: data.key });
+      if (this._isMounted) {
+        firebaseDB
+          .ref(`${this.state.gameID}/${data.key}`)
+          .update({
+            role: roleOfPlayer,
+            location: locationOfPlayers,
+            votes: 0
+          })
+          .catch(err => {
+            console.log(err);
+          });
+        firebaseDB
+          .ref(`${this.state.gameID}`)
+          .update({
+            time: this.state.realtimeDB.length * 60
+          })
+          .catch(err => {
+            console.log(err);
+          });
+        if (roleOfPlayer === SPY) {
+          firebaseDB.ref(`${this.state.gameID}`).update({
+            spyName: data.val().user
+          });
+          this.setState({ spyPlayerID: data.key });
+        }
       }
     });
   };
@@ -160,18 +167,17 @@ export default class CreateGameScreen extends React.Component {
     return true;
   };
 
-  async componentWillMount() {
+  async componentDidMount() {
+    this._isMounted = true;
+    BackHandler.addEventListener("hardwareBackPress", this.handleOnBack);
     await this.generateIDofRoom();
     this.connectAdminToRoom();
-  }
-
-  componentDidMount() {
-    BackHandler.addEventListener("hardwareBackPress", this.handleOnBack);
     this.checkChangesInRoom();
     this.props.navigation.setParams({ gameID: this.state.gameID });
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
     BackHandler.removeEventListener("hardwareBackPress", this.handleOnBack);
     firebaseDB.ref(this.state.gameID).off("child_added");
     firebaseDB.ref(this.state.gameID).off("child_removed");

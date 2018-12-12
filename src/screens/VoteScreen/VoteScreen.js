@@ -37,19 +37,22 @@ export default class VoteScreen extends React.Component {
     spyPlayerID: this.props.navigation.getParam("spyPlayerID"),
     isVoted: false
   };
+  _isMounted = false;
 
   getData = () => {
     firebaseDB
       .ref(this.props.navigation.getParam("gameID"))
       .once("value", data => {
-        const newData = data.toJSON();
-        let keys = Object.keys(newData);
-        let realtimedb = Object.values(newData);
-        realtimedb = realtimedb.filter(
-          (data, index) => index < realtimedb.length - 2
-        );
-        keys = keys.filter((data, index) => index < keys.length - 2);
-        this.setState({ realtimeDB: realtimedb, IDs: keys });
+        if (this._isMounted) {
+          const newData = data.toJSON();
+          let keys = Object.keys(newData);
+          let realtimedb = Object.values(newData);
+          realtimedb = realtimedb.filter(
+            (data, index) => index < realtimedb.length - 2
+          );
+          keys = keys.filter((data, index) => index < keys.length - 2);
+          this.setState({ realtimeDB: realtimedb, IDs: keys });
+        }
       });
   };
 
@@ -68,15 +71,17 @@ export default class VoteScreen extends React.Component {
     firebaseDB
       .ref(this.props.navigation.getParam("gameID"))
       .on("child_changed", data => {
-        let newData = [...this.state.realtimeDB];
-        const index = this.getIndex(data.key);
-        newData[index] = data.val();
-        let vote = data.val().votes;
-        const voteNumber = this.state.maxVote;
-        if (voteNumber < vote) {
-          this.setState({ maxVote: vote, maxVotePlayerId: data.key });
+        if (this._isMounted) {
+          let newData = [...this.state.realtimeDB];
+          const index = this.getIndex(data.key);
+          newData[index] = data.val();
+          let vote = data.val().votes;
+          const voteNumber = this.state.maxVote;
+          if (voteNumber < vote) {
+            this.setState({ maxVote: vote, maxVotePlayerId: data.key });
+          }
+          this.setState({ realtimeDB: newData });
         }
-        this.setState({ realtimeDB: newData });
       });
 
     firebaseDB
@@ -103,7 +108,9 @@ export default class VoteScreen extends React.Component {
         }`
       )
       .once("value", data => {
-        vote = data.val().votes;
+        if (this._isMounted) {
+          vote = data.val().votes;
+        }
       });
     firebaseDB
       .ref(
@@ -166,11 +173,13 @@ export default class VoteScreen extends React.Component {
   };
 
   async componentDidMount() {
+    this._isMounted = true;
     await this.getData();
     this.checkChanges();
   }
 
   componentWillUnmount() {
+    this._isMounted = false;
     firebaseDB
       .ref(
         `${this.props.navigation.getParam(
